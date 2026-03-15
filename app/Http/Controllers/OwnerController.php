@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class OwnerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('user.auth');
+    }
     /**
      * Display a listing of the resource.
      */

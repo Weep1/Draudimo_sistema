@@ -24,7 +24,9 @@
                         <th>Phone</th>
                         <th>Email</th>
                         <th>Address</th>
-                        <th>Actions</th>
+                        @if(auth()->user()->isAdmin())
+                            <th>Actions</th>
+                        @endif
                     </tr>
                     </thead>
                     <tbody>
@@ -36,6 +38,7 @@
                             <td>{{ $owner->phone }}</td>
                             <td>{{ $owner->email }}</td>
                             <td>{{ $owner->address }}</td>
+                            @if(auth()->user()->isAdmin())
                             <td>
                                 <a href="{{ route('owners.edit', $owner) }}" class="btn btn-sm btn-primary">Edit</a>
                                 <form action="{{ route('owners.destroy', $owner) }}" method="POST" class="d-inline">
@@ -44,6 +47,7 @@
                                     <button class="btn btn-sm btn-danger">Delete</button>
                                 </form>
                             </td>
+                            @endif
                         </tr>
                     @endforeach
                     </tbody>
