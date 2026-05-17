@@ -17,14 +17,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $user = User::factory()->create([
+            'name' => 'admin',
+            'email' => 'aronas@gmail.com',
+            'role' => 'admin',
+        ]);
+        $user = User::factory()->create([
+            'name' => 'Normal User',
+            'email' => 'user@test.com',
+            'role' => 'user',
         ]);
 
-        Owner::factory(10)->create()->each(function ($owner) {
+        $readonly = User::factory()->create([
+            'name' => 'Read Only User',
+            'email' => 'readonly@test.com',
+            'role' => 'readonly',
+        ]);
+
+        Owner::factory(5)->create([
+            'user_id' => $user->id,
+        ])->each(function ($owner) {
+            Car::factory(rand(1, 3))->create([
+                'owner_id' => $owner->id,
+            ]);
+        });
+
+        Owner::factory(5)->create([
+            'user_id' => $readonly->id,
+        ])->each(function ($owner) {
             Car::factory(rand(1, 3))->create([
                 'owner_id' => $owner->id,
             ]);

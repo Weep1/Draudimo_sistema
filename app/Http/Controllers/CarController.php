@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Owner;
 use Illuminate\Http\Request;
+use App\Models\CarPhoto;
+use Illuminate\Support\Facades\Storage;
 
 class CarController extends Controller
 {
@@ -13,7 +15,14 @@ class CarController extends Controller
      */
     public function index()
     {
-        $cars = Car::with('owner')->orderBy('id', 'desc')->get();
+        $user = auth()->user();
+        if($user->isAdmin() || $user->isReadOnly()){
+            $cars = Car::all();
+        } else {
+            $cars = Car::whereHas('owner', function($query) use($user){
+                $query->where('user_id', $user->id);
+            })->get();
+        }
         return view('cars.index', compact('cars'));
     }
 
@@ -22,7 +31,15 @@ class CarController extends Controller
      */
     public function create()
     {
-        $owners = Owner::orderBy('name')->get();
+        $user = auth()->user();
+        if ($user->isAdmin() || $user->isReadOnly()) {
+
+        $owners = Owner::all();
+
+    } else {
+
+        $owners = Owner::where('user_id', $user->id)->get();
+    }
         return view('cars.create', compact('owners'));
     }
 
@@ -38,7 +55,20 @@ class CarController extends Controller
             'owner_id' => ['nullable', 'exists:owners,id'],
         ]);
 
-        Car::create($data);
+        $car = Car::create($data);
+
+        if ($request->hasFile('photos')) {
+
+            foreach ($request->file('photos') as $photo) {
+
+                $path = $photo->store('cars', 'public');
+
+                CarPhoto::create([
+                    'car_id' => $car->id,
+                    'photo' => $path
+                ]);
+            }
+        }
 
         return redirect()->route('cars.index');
     }
@@ -56,7 +86,16 @@ class CarController extends Controller
      */
     public function edit(Car $car)
     {
-        $owners = Owner::orderBy('name')->get();
+        $this->authorize('update', $car);
+        $user = auth()->user();
+        if ($user->isAdmin() || $user->isReadOnly()) {
+
+            $owners = Owner::all();
+
+        } else {
+
+            $owners = Owner::where('user_id', $user->id)->get();
+        }
         return view('cars.edit', compact('car', 'owners'));
     }
 
@@ -65,6 +104,7 @@ class CarController extends Controller
      */
     public function update(Request $request, Car $car)
     {
+        $this->authorize('update', $car);
         $data = $request->validate([
             'reg_number' => ['required', 'string', 'max:255'],
             'brand' => ['required', 'string', 'max:255'],
@@ -73,7 +113,18 @@ class CarController extends Controller
         ]);
 
         $car->update($data);
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
 
+                $path = $photo->store('cars', 'public');
+
+                CarPhoto::create([
+                    'car_id' => $car->id,
+                    'photo' => $path
+                ]);
+            }
+        }
+        //dd($request->all(), $request->file('photos'));
         return redirect()->route('cars.index');
     }
 
@@ -82,7 +133,13 @@ class CarController extends Controller
      */
     public function destroy(Car $car)
     {
+        $this->authorize('delete', $car);
         $car->delete();
         return redirect()->route('cars.index');
+    }
+    public function deletePhoto(CarPhoto $photo){
+        Storage::disk('public')->delete($photo->photo);
+        $photo->delete();
+        return redirect()->route('cars.edit', $photo->car_id);
     }
 }

@@ -18,6 +18,7 @@
                 @endif
                 <form method="POST" action="{{ route('owners.update', $owner) }}">
                     @csrf
+                    @method('put')
 
                     <div class="mb-3 form-floating">
                         <input type="text" class="form-control" id="name" name="name"
@@ -48,6 +49,7 @@
                                placeholder="Address" value="{{ old('address', $owner->address) }}" required>
                         <label for="address">Address</label>
                     </div>
+
 
                     <div class="mb-3">
                         <label class="form-label">Cars</label>

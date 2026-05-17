@@ -3,10 +3,10 @@
 @section('content')
     <div class="container py-5">
 
-        <h2 class="mb-4 text-center">Car Owners</h2>
+        <h2 class="mb-4 text-center">{{__('Owners list')}}</h2>
 
         <div class="mb-3 text-center flex">
-            <a href="{{ route('owners.create') }}" class="btn btn-success">Add New Owner</a>
+            <a href="{{ route('owners.create') }}" class="btn btn-success">{{__('Add New Owner')}}</a>
         </div>
 
         @if($owners->isEmpty())
@@ -16,37 +16,31 @@
         @else
             <div class="table-responsive shadow rounded">
                 <table class="table table-striped table-hover table-bordered align-middle mb-0">
-                    <thead class="">
+                    <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Surname</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>Address</th>
-                        @if(auth()->user()->isAdmin())
-                            <th>Actions</th>
+                        <th>{{__('Name')}}</th>
+                        <th>{{__('Surname')}}</th>
+                        <th>{{__('Phone')}}</th>
+                        <th>{{__("Email")}}</th>
+                        <th>{{__("Address")}}</th>
+                        @if(!auth()->user()->isReadOnly())
+                            <th>{{__('Actions')}}</th>
                         @endif
                     </tr>
                     </thead>
                     <tbody>
                     @foreach($owners as $owner)
                         <tr>
-                            <td>{{ $owner->id }}</td>
                             <td>{{ $owner->name }}</td>
                             <td>{{ $owner->surname }}</td>
                             <td>{{ $owner->phone }}</td>
                             <td>{{ $owner->email }}</td>
                             <td>{{ $owner->address }}</td>
-                            @if(auth()->user()->isAdmin())
-                            <td>
-                                <a href="{{ route('owners.edit', $owner) }}" class="btn btn-sm btn-primary">Edit</a>
-                                <form action="{{ route('owners.destroy', $owner) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger">Delete</button>
-                                </form>
-                            </td>
+                            @if(!auth()->user()->isReadOnly())
+                                <td>
+                                    <a href="{{ route('owners.edit', $owner->id) }}" class="btn btn-sm btn-primary">{{__('Edit')}}</a>
+                                    <a href="{{ route('owners.destroy', $owner->id) }}" class="btn btn-danger">{{__('Delete')}}</a>
+                                </td>
                             @endif
                         </tr>
                     @endforeach

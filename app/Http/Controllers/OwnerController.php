@@ -16,9 +16,15 @@ class OwnerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $owners = Owner::with('cars')->orderBy('id', 'desc')->get();
+        $user = auth()->user();
+
+        if($user->role === 'admin' || $user->role === 'readonly'){
+            $owners = Owner::all();
+        } else {
+            $owners = Owner::where('user_id', $user->id)->get();
+        }
         return view('owners.index', compact('owners'));
     }
 
@@ -38,6 +44,18 @@ class OwnerController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name'=>'required|max:24',
+            'surname'=>'required|max:24',
+            'email'=>'required|email|unique:owners,email'
+        ],[
+            'name.required'=>__('Name is required'),
+            'name.max'=>__('Name must be shorter than 24 characters'),
+            'surname.required'=>__('Surname is required'),
+            'email.unique'=>__('This email is already registered'),
+            'email.required'=>__('Email is required'),
+            'email.email'=>__('Invalid email')
+            ]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'surname' => ['required', 'string', 'max:255'],
@@ -55,6 +73,7 @@ class OwnerController extends Controller
                 'phone' => $data['phone'],
                 'email' => $data['email'],
                 'address' => $data['address'],
+                'user_id' => auth()->user()->id,
             ]);
 
             if (!empty($data['cars'])) {
@@ -78,6 +97,7 @@ class OwnerController extends Controller
      */
     public function edit(Owner $owner)
     {
+        $this->authorize('update', $owner);
         $cars = Car::where(function ($query) use ($owner) {
             $query->whereNull('owner_id')
                 ->orWhere('owner_id', $owner->id);
@@ -101,7 +121,6 @@ class OwnerController extends Controller
             'cars' => ['nullable', 'array'],
             'cars.*' => ['integer', 'exists:cars,id'],
         ]);
-
         DB::transaction(function () use ($data, $owner) {
             $owner->update([
                 'name' => $data['name'],
@@ -110,7 +129,6 @@ class OwnerController extends Controller
                 'email' => $data['email'],
                 'address' => $data['address'],
             ]);
-
             Car::where('owner_id', $owner->id)->update(['owner_id' => null]);
 
             if (!empty($data['cars'])) {

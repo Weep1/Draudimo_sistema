@@ -9,7 +9,7 @@
             <div class="card-body">
                 @if($errors->any())
                     <div class="alert alert-danger">
-                        <ul class="mb-0">
+                        <ul class="list">
                             @foreach($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -20,13 +20,13 @@
                     @csrf
 
                     <div class="mb-3 form-floating">
-                        <input type="text" class="form-control" id="name" name="name"
+                        <input type="text" class="form-control @error('name') is invalid @enderror" id="name" name="name"
                                placeholder="Name" value="{{ old('name') }}" required>
                         <label for="name">First Name</label>
                     </div>
 
                     <div class="mb-3 form-floating">
-                        <input type="text" class="form-control" id="surname" name="surname"
+                        <input type="text" class="form-control @error('surname') is invalid @enderror" id="surname" name="surname"
                                placeholder="Surname" value="{{ old('surname') }}" required>
                         <label for="surname">Surname</label>
                     </div>
@@ -38,7 +38,7 @@
                     </div>
 
                     <div class="mb-3 form-floating">
-                        <input type="email" class="form-control" id="email" name="email"
+                        <input type="email" class="form-control @error('email') is invalid @enderror" id="email" name="email"
                                placeholder="Email" value="{{ old('email') }}" required>
                         <label for="email">Email</label>
                     </div>
