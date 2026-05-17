@@ -57,7 +57,7 @@
                         <br>
                         <a class="btn btn-danger mt-2"
                            href="{{ route('cars.deletePhoto', $photo) }}">
-                            Ištrinti nuotrauką
+                            {{__('Delete photo')}}
                         </a>
                     </div>
                 @endforeach

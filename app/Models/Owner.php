@@ -10,7 +10,7 @@ class Owner extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'surname', 'phone', 'email', 'address'
+        'name', 'surname', 'phone', 'email', 'address', 'user_id'
     ];
 
     public function cars(){
